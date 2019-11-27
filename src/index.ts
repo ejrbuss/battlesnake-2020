@@ -2,7 +2,7 @@ import bodyParser from 'body-parser';
 import express from 'express';
 import logger from 'morgan';
 
-const PORT = 8080;
+const PORT = 80;
 const app  = express();
 
 app.set('port', PORT);
