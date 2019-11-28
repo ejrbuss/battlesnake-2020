@@ -1,5 +1,7 @@
 console.log("loading...")
 
+var host = "http://ec2-3-14-8-215.us-east-2.compute.amazonaws.com"
+
 $(() => {
   $("#validate-snake-btn").click(event => {
     event.preventDefault()
@@ -11,7 +13,7 @@ $(() => {
       return
     }
 
-    fetch(`http://localhost:3005/validateSnake?url=${url}`)
+    fetch(`${host}:3005/validateSnake?url=${url}`)
       .then(resp => resp.json())
       .then(json => $("#validate-snake").html(`<pre>${JSON.stringify(json, null, 4)}</pre>`))
       .catch(err => $("#errors").text(err))
@@ -44,7 +46,10 @@ $(() => {
     if ($("#food-spawn-chance").val()) {
       MaxTurnsToNextFoodSpawn = parseInt($("#food-spawn-chance").val())
     }
-    const snakes = []
+    const snakes = [{
+      name: "battlesnake-2020",
+      url: `${host}:3000`,
+    }]
 
     $(".snake-group").each(function() {
       const url = $(".snake-url", $(this)).val()
@@ -59,7 +64,7 @@ $(() => {
     if (snakes.length === 0) {
       $("#errors").text("No snakes available")
     }
-    fetch("http://localhost:3005/games", {
+    fetch(`${host}:3005/games`, {
       method: "POST",
       body: JSON.stringify({
         width,
@@ -71,10 +76,10 @@ $(() => {
     }).then(resp => resp.json())
       .then(json => {
         const id = json.ID
-        fetch(`http://localhost:3005/games/${id}/start`, {
+        fetch(`${host}:3005/games/${id}/start`, {
           method: "POST"
         }).then(_ => {
-          $("#board").attr("src", `http://localhost:3009?engine=http://localhost:3005&game=${id}`)
+          $("#board").attr("src", `${host}:3009?engine=${host}:3005&game=${id}`)
         }).catch(err => $("#errors").text(err))
       })
       .catch(err => $("#errors").text(err))

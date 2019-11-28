@@ -17,12 +17,10 @@ else
     nvm install node
 fi
 
-echo "Starting engine..."
-engine_start
-
 echo "Installing dependencies..."
 cd ..
 npm install -g typescript &>> $LOG
+npm install -g jest &>> $LOG
 npm install &>> $LOG
 
 echo "Done."
