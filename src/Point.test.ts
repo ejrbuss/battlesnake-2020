@@ -4,7 +4,7 @@ const Points = new PointProvider(10, 10);
 
 function expectPoint(x: number, y: number): Point {
     const p = Points.get(x, y);
-    expect(p).toBeTruthy();
+    expect(p).toBeGreaterThanOrEqual(0);
     return p as Point;
 }
 
@@ -12,8 +12,8 @@ function expectPoint(x: number, y: number): Point {
 test('PointProvider.get', () => {
     function testPoint(x: number, y: number) {
         const p = expectPoint(x, y);
-        expect(p[0]).toBe(x);
-        expect(p[1]).toBe(y);
+        expect(Points.x(p)).toBe(x);
+        expect(Points.y(p)).toBe(y);
         expect(p === Points.get(x, y));
     }
 
@@ -62,4 +62,9 @@ test('PointProvider.manhattan', () => {
     const p1 = expectPoint(2, 3);
     const p2 = expectPoint(7, 7);
     expect(Points.manhattan(p1, p2)).toBe(9);
+});
+
+test('PointProvider.toString', () => {
+    const p = expectPoint(4, 8);
+    expect(Points.toString(p)).toBe('(4, 8)');
 });

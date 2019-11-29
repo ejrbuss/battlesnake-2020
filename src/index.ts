@@ -1,7 +1,7 @@
 import bodyParser from 'body-parser';
 import express from 'express';
 import logger from 'morgan';
-import { move } from './battlesnake';
+import { move } from './Move';
 
 const PORT = 3000;
 const app  = express();
@@ -21,9 +21,9 @@ app.post('/start', (_, response) => {
 
 app.post('/move', (request, response) => {
     // NOTE: Do something here to generate your move
-    return response.json({
-        move: move(request.body as any),
-    })
+    const mv = move(request.body as any);
+    console.log(mv);
+    return response.json({ move: mv });
 });
 
 app.post('/end', (_, response) => {

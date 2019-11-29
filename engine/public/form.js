@@ -1,6 +1,6 @@
 console.log("loading...")
 
-var host = "http://ec2-3-14-8-215.us-east-2.compute.amazonaws.com"
+var host = "http://ec2-18-188-89-250.us-east-2.compute.amazonaws.com"
 
 $(() => {
   $("#validate-snake-btn").click(event => {

@@ -1,65 +1,137 @@
-import { RMove } from "./types";
 
-export type Point = Readonly<Int32Array>;
+/**
+ * We encode 2d points as indexes in to an array of size width * height. For
+ * example (0, 0) is represented as just 0. More generally the conversion to
+ * an index is:
+ * 
+ *  index = y * width + x
+ * 
+ * And to convert back:
+ * 
+ *  x = index % width
+ *  y = index / width (With integer division)
+ */
+export type Point = number;
 
+/**
+ * In order to correctly encode points we need to know the dimensions of our
+ * array (width and height). These details are encoded in `PointProvider` which
+ * handles common Point operations, so that users of Points do not have to
+ * care about the integer representation.
+ */
 export class PointProvider {
 
     readonly width: number;
     readonly height: number;
-    readonly buffer: Int32Array;
-    readonly cache: Point[];
-
+    readonly bounds: number;
+    
     constructor(width: number, height: number) {
-        this.width = width;
-        this.height = height;
-        this.buffer = new Int32Array(width * height * 2);
-        this.cache = new Array(width * height);
-        let p = 0;
-        for (let x = 0; x < width; x++) {
-            for (let y = 0; y < height; y++) {
-                this.cache[p / 2] = this.buffer.subarray(p, p + 2);
-                this.buffer[p] = x;
-                p++;
-                this.buffer[p] = y;
-                p++;
-            }
-        }
+        // We | 0 because we REALLY want all of these to be integers
+        this.width  = width            | 0;
+        this.height = height           | 0;
+        this.bounds = (width * height) | 0;
     }
 
-    get(x: number, y: number): Point | null {
-        const p = this.width * x + y;
-        if (p < 0 || p >= this.width * this.height) {
-            return null;
-        }
-        return this.cache[p];
+    /**
+     * Returns the point (index) that represents (x, y) if it exists in this
+     * PointProvider's domain
+     */
+    get(x: number, y: number): Point | undefined {
+        if (x < 0 || x >= this.width)  { return; }
+        if (y < 0 || y >= this.height) { return; }
+        const p = y * this.width + x;
+        return p;
     }
 
-    up(p: Point): Point | null {
-        return this.get(p[0], p[1] - 1);
+    /**
+     * Returns the point above `p`
+     */
+    up(p: Point): Point | undefined {
+        return this.get(this.x(p), this.y(p) - 1);
     }
 
-    down(p: Point): Point | null {
-        return this.get(p[0], p[1] + 1);
+    /**
+     * Returns the point below `p`
+     */
+    down(p: Point): Point | undefined {
+        return this.get(this.x(p), this.y(p) + 1);
     }
 
-    left(p: Point): Point | null {
-        return this.get(p[0] - 1, p[1]);
+    /**
+     * Returns the point left of `p`
+     */
+    left(p: Point): Point | undefined {
+        return this.get(this.x(p) - 1, this.y(p));
     }
 
-    right(p: Point): Point | null {
-        return this.get(p[0] + 1, p[1]);
+    /**
+     * Returns the point right of `p`
+     */
+    right(p: Point): Point | undefined {
+        return this.get(this.x(p) + 1, this.y(p));
     }
 
-    move(p1: Point, p2: Point): RMove | null {
-        if (p2 === this.up(p1))    { return 'up'; }
-        if (p2 === this.down(p1))  { return 'down'; }
-        if (p2 === this.left(p1))  { return 'left'; }
+    /**
+     * Returns the direction of a move as a string from point `p1` to `p2` if 
+     * applicable
+     */
+    move(p1: Point, p2: Point): string | undefined {
+        if (p2 === this.up(p1))    { return 'up';    }
+        if (p2 === this.down(p1))  { return 'down';  }
+        if (p2 === this.left(p1))  { return 'left';  }
         if (p2 === this.right(p1)) { return 'right'; }
-        return null;
+        return undefined;
     }
 
+    /**
+     * Returns all neighboring points of `p`
+     */
+    neighbors(p: Point): Point[] {
+        const up        = this.up(p);
+        const down      = this.down(p);
+        const left      = this.left(p);
+        const right     = this.right(p);
+        const neighbors = [];
+        if (up)    { neighbors.push(up);    }
+        if (down)  { neighbors.push(down);  }
+        if (left)  { neighbors.push(left);  }
+        if (right) { neighbors.push(right); }
+        return neighbors;
+    }
+
+    /**
+     * Returns the manhattan distance between 2 points.
+     * https://xlinux.nist.gov/dads/HTML/manhattanDistance.html
+     */
     manhattan(p1: Point, p2: Point): number {
-        return Math.abs(p1[0] - p2[0]) + Math.abs(p1[1] - p2[1]);
+        return (
+            Math.abs(this.x(p1) - this.x(p2)) + 
+            Math.abs(this.y(p1) - this.y(p2))
+        );
+    }
+
+    /**
+     * Get the x value of point `p`
+     */
+    x(p: Point) {
+        return p % this.width;
+    }
+
+    /**
+     * Get the y value of point `p`
+     */
+    y(p: Point) {
+        // JavaScript will only bitwise OR integers, so | 0 effectively floors
+        // the result (but ever so slightly faster than Math.floor)
+        // https://jsperf.com/or-vs-floor/2
+        return (p / this.width) | 0;
+    }
+
+    /**
+     * Print a readable version of point `p` in the form "(x, y)""
+     */
+    toString(p: Point) {
+        return `(${this.x(p)}, ${this.y(p)})`;
     }
 
 }
