@@ -17,7 +17,7 @@ export class Snake {
      *  - A max value of 65536 corresponds to a board size of 256 * 256, which
      *    should be plenty big enough
      */
-    points: Uint16Array;
+    readonly points: Uint16Array;
     grow: boolean;
 
     private constructor(points: Uint16Array) {
@@ -26,7 +26,7 @@ export class Snake {
     }
 
     /**
-     * Returns a new Snake from an array of Points.
+     * Returns a new Snake from an array of Points
      */
     static fromPoints(points: Point[]): Snake {
         const buffer = new Uint16Array(points.length);
@@ -67,6 +67,14 @@ export class Snake {
         return this.points[this.points.length - 1];
     }
 
+    get length() {
+        if (this.grow) {
+            return this.points.length + 1;
+        } else {
+            return this.points.length;
+        }
+    }
+
     /**
      * Prepare the game for the upcoming move: remove our tail from the board
      * so other snakes can move into that spot.
@@ -79,7 +87,7 @@ export class Snake {
     /**
      * Return all possible future states of this Snake.
      */
-    futureStates(game: Game): Snake[] {
+    getFutureSnakes(game: Game): Snake[] {
         // These are all possible heads that fit in the board, we still need 
         // to check if those spots are free
         const futureHeads = game.points.neighbors(this.head);

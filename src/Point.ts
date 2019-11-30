@@ -44,6 +44,18 @@ export class PointProvider {
     }
 
     /**
+     * Like get, but must return a point, otherwise it will throw
+     */
+    mustGet(x: number, y: number): Point {
+        const p = this.get(x, y);
+        if (p !== undefined) { 
+            return p; 
+        } else { 
+            throw new Error(`mustGet failed for (${x}, ${y}) on board of size ${this.width}*${this.height}`); 
+        }
+    }
+
+    /**
      * Returns the point above `p`
      */
     up(p: Point): Point | undefined {
@@ -92,10 +104,10 @@ export class PointProvider {
         const left      = this.left(p);
         const right     = this.right(p);
         const neighbors = [];
-        if (up)    { neighbors.push(up);    }
-        if (down)  { neighbors.push(down);  }
-        if (left)  { neighbors.push(left);  }
-        if (right) { neighbors.push(right); }
+        if (undefined !== up)    { neighbors.push(up);    }
+        if (undefined !== down)  { neighbors.push(down);  }
+        if (undefined !== left)  { neighbors.push(left);  }
+        if (undefined !== right) { neighbors.push(right); }
         return neighbors;
     }
 

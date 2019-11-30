@@ -2,6 +2,7 @@ import bodyParser from 'body-parser';
 import express from 'express';
 import logger from 'morgan';
 import { move } from './Move';
+import { RequestWrapper } from './Request';
 
 const PORT = 3000;
 const app  = express();
@@ -21,7 +22,7 @@ app.post('/start', (_, response) => {
 
 app.post('/move', (request, response) => {
     // NOTE: Do something here to generate your move
-    const mv = move(request.body as any);
+    const mv = move(new RequestWrapper(request.body as any));
     console.log(mv);
     return response.json({ move: mv });
 });

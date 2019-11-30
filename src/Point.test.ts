@@ -1,20 +1,13 @@
 import { PointProvider, Point } from "./Point";
 
-const Points = new PointProvider(10, 10);
-
-function expectPoint(x: number, y: number): Point {
-    const p = Points.get(x, y);
-    expect(p).toBeGreaterThanOrEqual(0);
-    return p as Point;
-}
-
+const points = new PointProvider(10, 10);
 
 test('PointProvider.get', () => {
     function testPoint(x: number, y: number) {
-        const p = expectPoint(x, y);
-        expect(Points.x(p)).toBe(x);
-        expect(Points.y(p)).toBe(y);
-        expect(p === Points.get(x, y));
+        const p = points.get(x, y) as Point;
+        expect(points.x(p)).toBe(x);
+        expect(points.y(p)).toBe(y);
+        expect(p === points.get(x, y));
     }
 
     testPoint(0, 0);
@@ -27,44 +20,49 @@ test('PointProvider.get', () => {
     testPoint(4, 3);
 });
 
+test('PointProvider.mustGet', () => {
+    expect(points.mustGet(0, 0)).toBeDefined();
+    expect(() => { points.mustGet(-1, -1); }).toThrow();
+});
+
 test('PointProvider.up', () => {
-    expect(Points.up(expectPoint(5, 5))).toBe(Points.get(5, 4));
+    expect(points.up(points.mustGet(5, 5))).toBe(points.get(5, 4));
 });
 
 test('PointProvider.down', () => {
-    expect(Points.down(expectPoint(5, 5))).toBe(Points.get(5, 6));
+    expect(points.down(points.mustGet(5, 5))).toBe(points.get(5, 6));
 });
 
 test('PointProvider.left', () => {
-    expect(Points.left(expectPoint(5, 5))).toBe(Points.get(4, 5));
+    expect(points.left(points.mustGet(5, 5))).toBe(points.get(4, 5));
 });
 
 test('PointProvider.right', () => {
-    expect(Points.right(expectPoint(5, 5))).toBe(Points.get(6, 5));
+    expect(points.right(points.mustGet(5, 5))).toBe(points.get(6, 5));
 });
 
 test('PointProvider.move', () => {
-    const p = expectPoint(5, 5);
-    const up = Points.up(p);
-    const down = Points.down(p);
-    const left = Points.left(p);
-    const right = Points.right(p);
+    const p = points.mustGet(5, 5);
+    const up = points.up(p);
+    const down = points.down(p);
+    const left = points.left(p);
+    const right = points.right(p);
     expect(up && down && left && right).toBeTruthy();
     if (up && down && left && right) {
-        expect(Points.move(p, up)).toBe('up');
-        expect(Points.move(p, down)).toBe('down');
-        expect(Points.move(p, left)).toBe('left');
-        expect(Points.move(p, right)).toBe('right');
+        expect(points.move(p, up)).toBe('up');
+        expect(points.move(p, down)).toBe('down');
+        expect(points.move(p, left)).toBe('left');
+        expect(points.move(p, right)).toBe('right');
     }
 });
 
 test('PointProvider.manhattan', () => {
-    const p1 = expectPoint(2, 3);
-    const p2 = expectPoint(7, 7);
-    expect(Points.manhattan(p1, p2)).toBe(9);
+    const p1 = points.mustGet(2, 3);
+    const p2 = points.mustGet(7, 7);
+    expect(points.manhattan(p1, p2)).toBe(9);
 });
 
 test('PointProvider.toString', () => {
-    const p = expectPoint(4, 8);
-    expect(Points.toString(p)).toBe('(4, 8)');
+    const p = points.mustGet(4, 8);
+    expect(points.toString(p)).toBe('(4, 8)');
 });
